@@ -6,7 +6,7 @@ library(reshape2)
 Sys.setenv("plotly_username"="RoelPi")
 Sys.setenv("plotly_api_key"=readLines("plot.txt",n=1,warn=F))
  
-# Voertuigenpark - awesome filenaming /s
+# Meest recente cijfers wagenpark - awesome filenaming /s
 park <- list()
 park[[16]] <- "http://statbel.fgov.be/nl/binaries/veh_parc_2016_nl_tcm325-280143.xls"
 park[[15]] <- "http://statbel.fgov.be/nl/binaries/veh_parc_2015_nl_tcm325-271969.xls"
@@ -21,7 +21,10 @@ for (i in 1:length(park)) {
         voerPark[[i]] <- read.xlsx2(paste0("voertuigenpark/voertuigenpark_jaar_",i,".xls"),5,colClasses="character")
     }
 }
+# Geen link of API beschikbaar. Tabel zelf samen te stellen op: http://statistieken.vlaanderen.be/QlikView/
 stats <- data.table(read.xlsx2("opgevraagde_statistieken.xls",1,colClasses=c("character","character","numeric","numeric","numeric","numeric"),stringsAsFactors=F))
+
+## Toevoegen meest recente cijfers federale overheid
 # 2016 - Gent
 stats[102,4] <- as.numeric(as.character(voerPark[[16]][169,8]))
 # 2016 - Aalst
@@ -37,6 +40,7 @@ stats[136,4] <- as.numeric(as.character(voerPark[[16]][171,8]))
 # 2016 - Merelbeke
 stats[170,4] <- as.numeric(as.character(voerPark[[16]][174,8]))
 
+# Nieuwe kolommen berekenen
 stats <- setNames(stats, c("Gemeente","NIS","Jaar","Personenwagens","Personenwagens1000","Inwoners"))
 stats <- stats[,Personenwagens1000recalc:=Personenwagens/Inwoners]
 stats <- stats[,PersonenwagensINC:=Personenwagens/head(Personenwagens,1)*100-100,by=Gemeente]
